@@ -54,7 +54,7 @@ class AudioPlayer {
         console.log(this.index + value < this.songs.length)
         if(this.index + value >= 0 && 
            this.index + value < songs.length ){
-            this._index += value;
+            this._index = value;
             this.loadSong();
         }
     }
@@ -65,21 +65,49 @@ class AudioPlayer {
 
     loadSong(){
         
-        ap.src = songs[this.index].file;
+        let player = document.querySelector("#player");
+        let btns = document.querySelector(".btns");
+        player.classList.add("placeholder");
+        btns.classList.add("btnDisable"); 
+        let objSong = songs[this.index];
+
+        ap.gui = {
+            artistName: {
+                value: songs[this.index].artist,
+                DOMElement: ap.gui.artistName.DOMElement
+            },
+            songName: {
+                value: songs[this.index].name,
+                DOMElement: ap.gui.songName.DOMElement
+            }            
+        }
+
+        fetch(`${objSong.cover}`, {})
+        .then((response) => {
+            return response.blob()
+        })
+        .then((img) => { 
+            if(player.classList.contains("placeholder")){
+                player.classList.remove("placeholder");
+            }
             ap.gui = {
-                artistName: {
-                    value: songs[this.index].artist,
-                    DOMElement: ap.gui.artistName.DOMElement
-                },
-                songName: {
-                    value: songs[this.index].name,
-                    DOMElement: ap.gui.songName.DOMElement
-                },
                 albumCover: {
-                    value: songs[this.index].cover,
+                    value: URL.createObjectURL(img),
                     DOMElement: ap.gui.albumCover.DOMElement
                 }
             }
+            
+        })
+
+        fetch(`${objSong.file}`, {})
+        .then((response) => {
+            return response.blob()
+        })
+        .then((songFile) => {
+            btns.classList.remove("btnDisable");            
+            ap.src = URL.createObjectURL(songFile);
+        })
+        
     }
 
     _loadSong(src) {
@@ -89,10 +117,9 @@ class AudioPlayer {
             this.gui = {
                 totalTime: { value: this.player.duration, DOMElement: this.gui.totalTime.DOMElement},
                 currentTime: { value: 0, DOMElement: this.gui.currentTime.DOMElement }
-            }
+            }            
         }
         this.player.ontimeupdate = () => {
-            //console.log(this.player.currentTime);
             this.gui = {
                 currentTime: { value: this.player.currentTime, DOMElement: this.gui.currentTime.DOMElement }
             }
@@ -100,8 +127,17 @@ class AudioPlayer {
             var progress = (currentTime / totalTime) * 100;
             let pBar = this.gui.progressBar.DOMElement.querySelector("div");
             pBar.style.width = `${progress}%`;
-        }
+        }             
+    }
 
+    availableButton(val = false)
+    {
+        let player = document.querySelector(".btns");
+        if (val) {
+            player.classList.remove("btnDisable");
+        } else {
+            player.classList.add("btnDisable");
+        }
     }
 
     _setToMinsSecond(time){
@@ -197,12 +233,25 @@ class AudioPlayer {
                 this._toggleIcon(this.buttons.volume, "fa-volume-up", "fa-volume-mute");
 
             },
-            back: () => {this.index--; this.player.play()},
-            next: () => {this.index++; this.player.play()},
-            close: () => {window.sessionStorage.clear(); window.location = "./"},
+            back: () => {
+                this.index--;
+                this._playSong();
+            },
+            next: () => {
+                this.index++;       
+                this._playSong();                                     
+            },
+            close: () => {window.sessionStorage.clear(); window.location = "index.html"},
 
         }
         this._assignValues(this._buttons, btns, actions);
+    }
+
+    _playSong(){
+        let i = this.buttons.playPause.querySelector("i");
+        i.classList.remove("fa-pause");
+        i.classList.add("fa-play");
+        this.player.play()
     }
 
     get buttons() {

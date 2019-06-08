@@ -92,6 +92,11 @@ body{
     flex:1;
 }
 
+.btnDisable{
+    pointer-events: none;
+    opacity: 0.5;
+}
+
 .progressBar{
     flex: 8;
     height: 5px;

@@ -24,7 +24,7 @@ function start() {
     //Fetch al API
     var headers = new Headers();
     headers.append("X-RapidAPI-Host", "deezerdevs-deezer.p.rapidapi.com");
-    headers.append("X-RapidAPI-Key", "e28ad5c50dmsh44c3cb29ce67af5p10614ejsn75d41ea6a56d");
+    headers.append("X-RapidAPI-Key", "3002dfd2ecmsh1f34c7151fbd1a3p18e3ecjsna3f85cea2136");
 
     var opciones = {
         method: 'GET',
